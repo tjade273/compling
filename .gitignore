@@ -1,0 +1,7 @@
+proposal
+readings
+*.aux
+*.log
+*.gz
+*.~
+#*
