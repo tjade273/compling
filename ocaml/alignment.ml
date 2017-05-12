@@ -130,12 +130,12 @@ let nw = fun() -> (wrapper global_align "GATTACA"  "GCATGCU")
                    
 let sw = fun() -> (wrapper local_align "TGTTACGG" "GGTTGACTA")
 
-let merge_align (score : 'a token -> 'a token -> bool -> float) s1 s2=
+let merge_align (score : 'a token -> 'a token -> bool -> float) s1 s2 h1 h2=
   let rec multiscore (t1 : 'a token list token) (t2 : 'a token list token) c =
     match (t1, t2) with
     | ((Handle | Gap) as a) , ((Handle | Gap) as b) -> score a b c
     | Token _, (Handle | Gap) -> multiscore t2 t1 c
-    | (Handle | Gap), Token t -> (List.fold_left (fun acc x -> acc+.(score Handle x c)) 0. t) /. float_of_int (List.length t)
+    | ((Handle | Gap) as a), Token t -> (List.fold_left (fun acc x -> acc+.(score a x c)) 0. t) /. float_of_int (List.length t)
     | Token a, Token b -> (List.fold_left
                             (fun acc ai -> (List.fold_left 
                                               (fun acc bi -> acc +. score ai bi c)
@@ -144,9 +144,33 @@ let merge_align (score : 'a token -> 'a token -> bool -> float) s1 s2=
                             
                                   
   in
-  (fun ((x,y),_)-> List.append x y)
-    (align  (fun (i1, j1, s1) (i2, j2, s2) -> (max i1 i2, max j1 j2))
-         [] multiscore s1 s2)
+  let stack (s1 : 'a alignment) (s2 : 'a alignment) : 'a alignment =
+    let combine_tokens t1 t2 = 
+      let t1 = match t1 with
+        | Gap -> List.make h1 Gap
+        | Token t -> t
+      in
+      let t2 = match t2 with
+        | Gap -> List.make h2 Gap
+        | Token t -> t
+      in
+      Token(t1@t2)
+    in List.map2 combine_tokens  (s1) (s2)
+  in
+  let ((x,y), _) = align  (fun (i1, j1, s1) (i2, j2, s2) -> (max i1 i2, max j1 j2))
+                          [] multiscore s1 s2 in
+  let res =  stack x y in
+  res
+
+let rec transpose list = match list with
+| []             -> []
+| []   :: xss    -> transpose xss
+| (x::xs) :: xss ->
+    (x :: List.map List.hd xss) :: transpose (xs :: List.map List.tl xss)
+    
+let print_align a =
+  let at = List.map (function Token x -> x) a in 
+  String.join "\n" (List.map (fun x -> String.of_list (List.map print_token x)) (transpose at))
 (*
 let rec multiple_align guide_tree score =
   
