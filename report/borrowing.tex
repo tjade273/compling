@@ -1,0 +1,137 @@
+\documentclass[doc,natbib]{apa6}
+
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage{setspace} %%Enables \doublespacing command for double linespacing
+
+\title{Identifying Borrowing in large word lists}
+\shorttitle{Borrowing Detection}
+\author{Tjaden Hess}
+\affiliation{Cornell University}
+%opening
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+	
+\end{abstract}
+
+\section{ Background }
+
+Traditionally, historical linguists have studied genetic relationships between languages with the help of the Comparative Method, which allows extremely accurate reconstructions of both the proto-language for the language family of interest and the phylogenetic tree expressing the genetic relationships within the language family. Recently, there has been an interest in automating this process, via automatic cognate detection and phylogenetic reconstruction, and several successful algorithms and pipelines have been proposed \citep{List2017a}.
+
+The newly emergent field of computational comparative linguistics borrows heavily from the more established domain of computational biology, adapting algorithms for gene sequence alignment and taxa clustering to the problems of phonetic sequence alignment and cognate clustering. Language, however, changes in a much more restricted manner than do nucleotide sequences; sound changes in human language are highly directional and conditioned solely by phonetic environment, as opposed to the uniformly random process that drives biological evolution. The regularity of sound change allows linguists to differentiate ``true'' cognate words--- those derived from a single proto-form through Neogramarian sound-change--- from words acquired through language contact \citep[p. 108]{Campbell1999}.
+
+Because ``true'' cognates allow reconstruction of proto-forms, a disproportionate quantity of research has been aimed towards identifying cognates while eliminating and disregarding irregularities caused by borrowing and analogy. For my project, I chose to look instead at computational detection of borrowing and its application to areal linguistics.
+
+\section{Methods}
+
+The central hypothesis of my project is that loanwords satisfy two properties: high phonetic similarity and poor regularity. The goal, then, is to construct scoring schema which can quantify both surface-level phonetic similarity and underlying genetic correspondence.
+
+\subsection{Alignment}
+
+In order to even begin an investigation into computational comparative linguistics, we must at the very least have a method for aligning sequences of phonemes so that we can identify corresponding segments in potential cognates. For pairwise alignments, the Needleman-Wunsch algorithm can be used to optimally align a pair of sequences using any scoring metric \citep{Needleman1970}. Finding optimal alignments for larger sets of words is much more difficult; while optimal algorithms exist for multiple alignment, the problem is NP-hard and so we rely on heuristic methods to give reasonable alignments. The most common technique, and the one used in my project, is \emph{progressive alignment}, in which we align sequences sequentially along a ``guide tree'', which is constructed via a clustering algorithm from a distance matrix derived from pairwise alignments. While progressive alignment is not perfect, when combined with pre- and post-processing techniques it gives a very reasonable alignment in only $O(n^3)$ time \citep{Feng1987}. 
+
+\subsection{Pairwise Alignment}
+
+In order to measure the similarity between segments, I use an adapted version of a method, first introduced by \citet{Dolgopolsky1986}, which quantifies the linguistic notion of phonetic similarity used in manual word alignment by classifying consonants into classes defined by laboratory confusion testing. More recently, a study by \citet{Turchin2010} quantified the pairwise coincidence of sound classes in manually aligned cognate sets, providing a ready-to-use similarity scoring system. \citet{List2012a} later extended this scoring scheme into a model call SCA, the current best performing algorithm, but for ease of implementation I used Dolgopolsky's method, which List dubs DOLGO.
+
+To create the pairwise alignments, I use a dynamic programming technique which operates on a matrix representing optimal subsequence alignments. Each cell of the matrix is filled inductively by the rule 
+\begin{equation}
+M_{i,j} = \max\begin{cases}
+F_{i,j-1} + S(-, B_j)\\
+F_{i-1,j} + S(A_i, -)\\
+F_{i-1, j-1} + S(A_i, B_j)
+\end{cases}
+\end{equation}
+where $A$ and $B$ are the sequences to align, $S$ is the scoring function, and $-$ represents a gap (insertion or deletion).
+
+Once the matrix is filled, we backtrack from $M_{i,j}$ to $M_{0,0}$, which gives the optimal pairwise alignment. The value of $M_{i,j}$ is the similarity score for the alignment, which will be used in calculating distance measurements for the multiple-sequence alignment. 
+
+The ability to define an arbitrary scoring function for pairs of sequences and gaps provides allows us to operate in several modes, depending largely on the penalty that we assign to insertions and deletions. In my implementation, I allow for this penalty to vary depending on whether the insert/delete operation is \emph{opening} a new gap or \emph{continuing} an existing gap. By manipulating this parameter, we can move along a spectrum between global and local alignment. In a global alignment, we attempt to align the full string, independent of subsequence structure while in a local alignment we care only about the best aligned subsequences and do not penalize large gaps. \todo{Insert Example of global vs local alignment} Advanced alignment algorithms make use of a wide variety of these modes in a ``library'' approach, but for simplicity I use the harmonic mean of a global mode and a local mode as my similarity metric.
+
+Arbitrary scoring functions also allow us to quantify sub-surface similarity in sequences; the end goal of cognate detection is to create a scoring function $S_{L_1,L_2}$ which is pairwise dependent on the languages $L_1$ and $L_2$ and quantifies not the surface-level phonetic similarity of two segments, but the underlying genetic relationship. This alignment score can be iteratively refined to produce better cognate judgment and correspondence class identification. 
+
+\subsubsection{Evaluation}
+
+There are several measures of performance for sequence alignment, each with its own shortcomings, which are discussed more in depth by Johann List---whose implementations I used in the evaluations---in \citep{List2012b}.\todo[inline]{Write more about this} The results of the evaluation can be seen in \ref{table:1} against List's SCA algorithm from the LingPy library. I computed the scores using LingPy's evaluation functions \citep{List2016}. The gold standard was a dataset of 16,609 words across 95 languages compiled by \citet{List2014} and available at \url{http://dx.doi.org/10.5281/zenodo.11877}.
+\begin{table}[h]
+	\centering{
+	\begin{tabular}{|l||c|c|c|}
+		\hline
+		Model & PAS & CS & SPS \\
+		\hline\hline
+		SCA & 85.72 & 92.32 & 95.93\\ \hline
+		DOLGO &77.06 & 81.85 & 88.53\\\hline
+	\end{tabular}
+	\caption{Test data versus state-of-the-art}
+	\label{table:1}}
+\end{table}
+
+\todo[inline]{Give examples of alignments, a figure showing the matrix, an some stuff about gold standards/ evaluations}
+
+\subsection{Multiple Alignment}
+
+In order to align multiple sequences, I use the heuristic approach of progressive alignment, which traditionally proceeds in three steps: \begin{enumerate}
+	\item A matrix is computed from pairwise distance scores are calculated for all sequences
+	\item A guide tree is constructed using a clustering algorithm 
+	\item Sequences are aligned sequentially along the guide tre
+\end{enumerate}
+
+Generally the implementation takes the form of a matrix-based dynamic programming algorithm, but I found it simpler to implement as a recursive function, memoized with a hash table. I also combined steps 2 and 3, merging alignments as the tree is constructed. The progressive technique also demonstrates more of the flexibility of the Neeedleman-Wunsch algorithm; at each step we merge two alignments by considering each column of the alignments to be a token and defining the scoring function as the arithmetic mean of the pairwise scores of individual components. \todo[inline]{example and better wording}
+
+
+\subsubsection{Clustering}
+
+In order to construct the guide tree, we need a \emph{distance} metric, while our pairwise alignment algorithm only gives pairwise similarity. The major issue with converting between the two interpretations of the measure is that the metric must be normalized in order to be directly comparable between alignments that do not necessarily share any sequences. For example, \todo[inline]{PUT and example here}
+%
+%\begin{figure}[h]
+%	\begin{tabular}{}
+%	
+%	\end{tabular}
+%\end{figure}
+
+To adjust for this disparity, we use a technique from the ALINE algorithm by \citet{Downey2008}. 
+\begin{equation}
+d = 1- \frac{2s}{s_1+s_2}
+\end{equation}
+where $s$ is the raw similarity score from the pairwise alignment, and $s_1,\ s_2$ are the scores obtained from aligning the sequences with themselves. This normalizes for length and gives a distance in the range $[0,1]$. 
+
+Given the distance metric, I used the Unweighted Pair Group Method with Arithmetic Mean (UPGMA) algorithm to construct the guide tree. UPGMA constructs a rooted tree with branch lengths from a distance matrix by iteratively joining the closest two nodes and then defining the distance to all of the other nodes as the arithmetic mean of all of the nodes in the two branches. Because UPGMA assumes ultrametricity, i.e. that all evolution happens at a constant rate across all branches, it is less accurate than newer methods like Neighbor-Joining, but its simplicity and fast running time make it a good choice for large datasets.
+
+\subsection{Cognate detection}
+
+The UPGMA, besides providing a guide tree for multiple alignment also allows us to cluster words that we can hypothesize to be cognates by providing a cutoff for the maximal distance between nodes that we will join. Thus, we can feed the algorithm a list of unlabeled words and it will produce a list of possible cognate sets, along with multiple-sequence alignments for each set.  
+\subsubsection{Parameters}
+Determining the cutoff parameter can be difficult, as the level of phonetic similarity within cognate classes varies dramatically by language. \todo[inline]{Some evidence/citations/numbers here} The cutoff can be first approximated by a human, and then incrementally decreased through the iterations of the algorithm, or it can be estimated through ML methods. 
+
+\subsection{Correspondence classes}
+
+\section{Language-Specific scoring}
+
+
+\section{Evaluation}
+
+\section{Reflection}
+
+\section{Conclusion}
+
+
+
+%%%%%%%%%%%BIBILIOGRAPHY%%%%%%%%%%%%%%%
+\newpage
+\begin{small} %%Makes bib small text size
+	\singlespacing %%Makes single spaced
+	%\bibliographystyle{Analysis} %%bib style found in bst folder, in bibtex folder, in texmf folder.
+	%\setlength{\bibsep}{0.5pt} %%Changes spacing between bib entries
+	\bibliography{CompLing} %%bib database found in bib folder, in bibtex folder
+	\thispagestyle{empty} %%Removes page numbers
+\end{small} %%End makes bib small text size
+
+\end{document}
+ 

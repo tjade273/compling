@@ -1,7 +1,11 @@
+data
 proposal
 readings
-*.aux
-*.log
-*.gz
-*.~
-#*
+**/*.aux
+**/*.log
+**/*.gz
+**/*~
+**/\#*
+*.pdf
+*.bbl
+*.blg
