@@ -9,7 +9,7 @@ let print_tree = function
                                
 
                                                   *)       
-let distance score s1 s2 = (-2.*.(score s1 s2))/.((score s1 s1) +. (score s2 s2))  
+let distance score s1 s2 = (1.-.(2.*.(score s1 s2)/.((score s1 s1) +. (score s2 s2))))  
 
 let rec cardinality = function
   | Leaf _ -> 1
