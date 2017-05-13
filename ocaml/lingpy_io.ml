@@ -23,9 +23,6 @@ let read_psq (filename : string) (model : string -> 'a token) =
   in
   (description, BatEnum.map pair_of_enum pairwise_alignments)
 
-let test = peek (snd p)
-
-
 let psq_align f p =
   let align_pair (label, (l1, p1), (l2, p2)) =
     let (a1, a2),_ = f p1 p2 in 
