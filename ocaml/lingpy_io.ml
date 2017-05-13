@@ -1,3 +1,4 @@
+
 type 'a ipa_token = ('a * string) token
 type 'a ipa_sequence = 'a ipa_token list
 type 'a psq =
@@ -25,7 +26,7 @@ let read_psq (filename : string) (model : string -> 'a token) =
 
 let psq_align f p =
   let align_pair (label, (l1, p1), (l2, p2)) =
-    let (a1, a2),_ = f p1 p2 in 
+    let (a1, a2),_ = f p1 p2 in
     (label, (l1, a1), (l2, a2))
   in
   (fst p, BatEnum.map align_pair (snd p))
@@ -46,7 +47,3 @@ let p = read_psq "/home/tjaden/Documents/compling/project/data/Online_Resource_1
 let a = psq_align dolgo_align p
 let () = print_psa "/home/tjaden/Desktop/testalign.psa" a;;
 
-(* Current DOLGO SP score- 88% 
-
-Probably due to IPA issues, should be ~94%
-*)
