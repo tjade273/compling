@@ -171,7 +171,3 @@ let rec transpose list = match list with
 let print_align a =
   let at = List.map (function Token x -> x) a in 
   String.join "\n" (List.map (fun x -> String.of_list (List.map print_token x)) (transpose at))
-(*
-let rec multiple_align guide_tree score =
-  
- *)

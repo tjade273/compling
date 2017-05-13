@@ -1,0 +1,59 @@
+\documentclass[jou,natbib]{apa6}
+
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[colorinlistoftodos]{todonotes}
+
+\title{Identifying Borrowing in large word lists}
+\shorttitle{Borrowing Detection}
+\author{Tjaden Hess}
+\affiliation{Cornell University}
+%opening
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+	
+\end{abstract}
+
+\section{ Background }
+
+Traditionally, historical linguists have studied genetic relationships between languages with the help of the Comparative Method, which allows extremely accurate reconstructions of both the proto-language for the language family of interest and the phylogenetic tree expressing the genetic relationships within the language family. Recently, there has been an interest in automating this process, via automatic cognate detection and phylogenetic reconstruction, and several successful algorithms and pipelines have been proposed. 
+
+The newly emergent field of computational comparative linguistics borrows heavily from the more established domain of computational biology, adapting algorithms for gene sequence alignment and taxa clustering to the problems of phonetic sequence alignment and cognate clustering. Language, however, changes in a much more restricted manner than do nucleotide sequences; sound changes in human language are highly directional and conditioned solely by phonetic environment, as opposed to the uniformly random process that drives biological evolution. The regularity of sound change allows linguists to differentiate ``true'' cognate words--- those derived from a single proto-form through Neogramarian sound-change--- from words acquired through language contact.
+
+Because ``true'' cognates allow reconstruction of proto-forms, a disproportionate quantity of research has been aimed towards identifying cognates while eliminating and disregarding irregularities caused by borrowing and analogy. For my project, I chose to look instead at computational detection of borrowing and its application to areal linguistics.
+
+\section{Methods}
+
+The central hypothesis of my project is that loanwords satisfy two properties: high phonetic similarity and poor regularity. The goal, then, is to construct scoring schema which can quantify both surface-level phonetic similarity and underlying genetic correspondence.
+
+\subsection{Alignment}
+
+In order to even begin an investigation into computational comparative linguistics, we must at the very least have a method for aligning sequences of phonemes so that we can identify corresponding segments in potential cognates. For pairwise alignments, the Needleman-Wunsch algorithm can be used to optimally align a pair of sequences using any scoring metric. Finding optimal alignments for larger sets of words is much more difficult; while optimal algorithms exist for multiple alignment, the problem is NP-hard and so we rely on heuristic methods to give reasonable alignments. The most common technique, and the one used in my project, is \emph{progressive alignment}, in which we align sequences sequentially along a ``guide tree'', which is constructed via a clustering algorithm from a distance matrix derived from pairwise alignments. While progressive alignment is not perfect, when combined with pre- and post-processing techniques it gives a very reasonable alignment in only $O(n^3)$ time. 
+
+\todo[inline]{More detailed description of the dynamic programming technique and the UPGMA algorithm. Also, maybe note the dynamic vs memoized recursive distinction}
+
+For pairwise alignment, I use the Sound-Class-Based Phonetic Alignment (SCA) method, which quantifies the linguistic notion of phonetic similarity used in manual word alignment. I then extend this into a multiple alignment setting via a guide tree produced by the Unweighted Pair Group Method with Arithmetic Mean (UPGMA) hierarchical clustering algorithm.  
+\todo[inline]{Give examples of alignments, a figure showing the matrix, an some stuff about gold standards/ evaluations}
+
+\subsection{Cognate detection}
+
+\subsection{Correspondence classes}
+
+\section{Language-Specific scoring}
+
+\section{Parameter Choices}
+
+\section{Evaluation}
+
+\section{Reflection}
+
+\section{Conclusion}
+
+\end{document}
+ 
