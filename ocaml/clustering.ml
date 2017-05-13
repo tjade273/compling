@@ -63,7 +63,8 @@ let rec upgma (score : 'a token list -> 'a token list -> float)
                             ) clusters)
      in
      if s > cutoff then clusters else
-       let (node, name) = merge_nodes x y in 
+       let (node, name) = merge_nodes x y in
+       print_int (cardinality x); print_newline ();
        upgma score merge cutoff (Node((x,y),s/.2., node, name)::(List.remove (List.remove clusters x) y))
                        
                        

@@ -14,14 +14,13 @@ sp = 0
 i = 0
 
 for filename in os.listdir(test_dir):
-    if filename.endswith(".psa"):
+    if filename.endswith(".msa"):
         e = EvalMSA(MSA(os.path.join(gold_dir, filename)),
                         MSA(os.path.join(test_dir, filename)))
         r += e.r_score()
         c += e.c_score()
         sp += e.sp_score()
-
-        i+= 1
+        i += 1
 
 print('r score: %f\n c score: %f\n sp score: %f' % (r/i, c/i, sp/i))
         

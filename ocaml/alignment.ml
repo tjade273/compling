@@ -21,7 +21,7 @@ let rec print_array a =
     | hd::tl -> print_char (print_token hd); print_array tl
                             
            
-let align startpoint default_cell score s1 s2 = 
+let align startpoint default_cell score s1 s2 =
   let l1 = List.length s1 in
   let l2 = List.length s2 in
   let s1 = Handle::s1 in

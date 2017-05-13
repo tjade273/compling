@@ -83,7 +83,7 @@ let a = psq_align dolgo_align p
 let () = print_psa "/home/tjaden/Desktop/testalign.psa" a;;
  *)
 
-let run_msa_test model score align msqs msas =
+let run_msa_test model score align msqs msas n =
    let readdir_option dir =
     try
       Some (Unix.readdir dir)
@@ -92,22 +92,23 @@ let run_msa_test model score align msqs msas =
    in
    let d = Unix.opendir msqs in
    let files = BatEnum.from_while (fun () -> readdir_option d) in
-   let files = List.of_enum (BatEnum.take 15 (BatEnum.filter
+   let files = List.of_enum (BatEnum.take n (BatEnum.filter
                                (fun s -> String.ends_with s ".msq") files))
    in
    print_int (List.length files);print_newline ();
    let run_alignment f =
      print_string f; print_newline ();
      let m = read_msq (msqs^"/"^f) model in
-     let a = msq_align (memoize score 1000) align m in
+     let l = List.length (snd m) in 
+     let a = msq_align score (memoize align (l*l*l*2) ) m in
      print_msa (msas^"/"^ (String.slice ~last:(-3) f)^"msa") a
    in
    List.iter run_alignment files;
    Unix.closedir d
                
 
-
+(*
 let msas = "../data/test_data/";;
 let msqs = "../data/Online_Resource_2/I_Gold_Standard/msq/";;
-let () = run_msa_test dolgo_of_string dolgo_score dolgo_align msqs msas;;
-
+let () = run_msa_test dolgo_of_string dolgo_score dolgo_align msqs msas 100;;
+ *)
