@@ -3,6 +3,10 @@ type 'a ipa_token = ('a * string) token
 type 'a ipa_sequence = 'a ipa_token list
 type 'a psq =
   string * (string * (string * 'a ipa_sequence)*(string * 'a ipa_sequence) BatEnum.t)
+
+let str_of_seq s =
+    String.join "\t" (List.map (function Gap -> "-" | Handle -> "+" | Token(_, c) -> c) s) 
+       
 let read_psq (filename : string) (model : string -> 'a token) =
   let lines = File.lines_of filename in
   let description = Option.get (BatEnum.get lines) in
@@ -33,8 +37,6 @@ let psq_align f p =
 
 
 let print_psa filename (title, alignments) =
-  let str_of_seq s =
-    String.join "\t" (List.map (function Gap -> "-" | Handle -> "+" | Token(_, c) -> c) s) in
   let file_string (desc, (l1, p1), (l2,p2)) =
     desc^"\n"
     ^l1^"\t"^(str_of_seq p1)^"\n"
@@ -43,7 +45,40 @@ let print_psa filename (title, alignments) =
   let lines = BatEnum.map file_string alignments in
   BatEnum.push lines title; File.write_lines filename lines
 
+type 'a msq = (string * string) *  'a tree list
+type 'a msa = (string * string) * ('a token list * string) list 
+
+let read_msq (filename : string) (model : string -> 'a token) : 'a msq =
+  let lines = File.lines_of filename in
+  let dataset = Option.get (BatEnum.get lines) in
+  let phrase = Option.get (BatEnum.get lines) in
+  let parse_string s =
+    let (a,b) = String.split s "\t" in
+     Leaf (List.map (fun t -> model t) (String.split_on_char '.' b), a)
+  in
+  let alignments = BatEnum.map parse_string lines in
+  ((dataset,phrase), List.of_enum alignments)
+                               
+let msq_align score align ((d,p), a) : 'a msa=
+  let sim x y = snd (align x y)in
+  let dist = distance sim in 
+  let detokenize = function Token a -> a | _ -> failwith "Bad final alignment" in
+  let upgma_tree = List.hd (upgma dist (merge_align score) infinity a) in
+  match upgma_tree with
+  | Node (_,_,alignment, names) -> ((d,p),
+                                    List.map2 (fun a b -> (a,b))
+                                              (transpose
+                                                 (List.map detokenize alignment))
+                                              names)
+  | _ -> failwith "Clustering Error"
+
+let print_msa filename ((d,p), a) =
+  let header = d^"\n"^p in
+  let file_string (l, n) = n^"\t"^(str_of_seq l) in
+  File.write_lines filename  (List.enum (header::(List.map file_string a)))
+              
+(*            
 let p = read_psq "/home/tjaden/Documents/compling/project/data/Online_Resource_1/I_Gold_Standard/reference.psq" dolgo_of_string
 let a = psq_align dolgo_align p
 let () = print_psa "/home/tjaden/Desktop/testalign.psa" a;;
-
+ *)
