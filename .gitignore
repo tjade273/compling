@@ -7,3 +7,5 @@ readings
 **/*~
 **/\#*
 *.pdf
+*.bbl
+*.blg
