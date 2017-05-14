@@ -69,7 +69,7 @@ There are several measures of performance for sequence alignment, each with its 
 		SCA & 88.59 & 92.32 & 95.93\\ \hline
 		DOLGO & 81.12 & 87.13 & 92.72 \\\hline
 	\end{tabular}
-	\caption{Test data versus state-of-the-art}
+	\caption{Pairwise Sequence Alignments}
 	\label{table:1}}
 \end{table}
 
@@ -85,6 +85,20 @@ In order to align multiple sequences, I use the heuristic approach of progressiv
 
 Generally the implementation takes the form of a matrix-based dynamic programming algorithm, but I found it simpler to implement as a recursive function, memoized with a hash table. I also combined steps 2 and 3, merging alignments as the tree is constructed. The progressive technique also demonstrates more of the flexibility of the Neeedleman-Wunsch algorithm; at each step we merge two alignments by considering each column of the alignments to be a token and defining the scoring function as the arithmetic mean of the pairwise scores of individual components. \todo[inline]{example and better wording}
 
+\subsubsection{Evaluation}
+
+\begin{table}[h]
+	\centering{
+		\begin{tabular}{|l||c|c|}
+			\hline
+			Model & SP & JC \\
+			\hline\hline
+			SCA & 90.11 & 85.03\\ \hline
+			DOLGO & 92.12 & 87.79  \\\hline
+		\end{tabular}
+		\caption{Multiple Sequence Alignment}
+		\label{table:2}}
+\end{table}
 
 \subsubsection{Clustering}
 
@@ -107,6 +121,9 @@ Given the distance metric, I used the Unweighted Pair Group Method with Arithmet
 \subsection{Cognate detection}
 
 The UPGMA, besides providing a guide tree for multiple alignment also allows us to cluster words that we can hypothesize to be cognates by providing a cutoff for the maximal distance between nodes that we will join. Thus, we can feed the algorithm a list of unlabeled words and it will produce a list of possible cognate sets, along with multiple-sequence alignments for each set.  
+
+
+
 \subsubsection{Parameters}
 Determining the cutoff parameter can be difficult, as the level of phonetic similarity within cognate classes varies dramatically by language. \todo[inline]{Some evidence/citations/numbers here} The cutoff can be first approximated by a human, and then incrementally decreased through the iterations of the algorithm, or it can be estimated through ML methods. 
 
