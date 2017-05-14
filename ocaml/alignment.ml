@@ -41,7 +41,6 @@ let align startpoint default_cell score s1 s2 =
                || (List.hd (snd mat.(i).(j))) = Delete in
   let best_cell = ref (0,0) in 
   for i = 0 to l1 do
-    (*  print_char '|';*)
     for j = 0 to l2 do
       let adjacent_cells = default_cell in
       let adjacent_cells = if i > 0 then
@@ -66,18 +65,13 @@ let align startpoint default_cell score s1 s2 =
          mat.(i).(j) <- max_cells adjacent_cells
        else ()
       );
-      (* print_backpointer (List.hd (snd mat.(i).(j)));
-      if (fst mat.(i).(j)) >= 0 then( print_char ' ';
-         print_int (fst mat.(i).(j)); print_char ' ';*)
       best_cell :=  startpoint (i, j, (fst mat.(i).(j)))
                     (fst !best_cell,
                      snd !best_cell,
                      fst(mat.(fst !best_cell).(snd !best_cell)));
     done;
-    (*   print_endline "|"*)
   done;
   let rec calculate_alignment a1 a2 i j =
-    (*    print_backpointer (List.hd (snd mat.(i).(j))); print_endline "";print_array a1; print_array a2; print_endline "";*)
     match List.hd (snd mat.(i).(j)) with
     | Match -> calculate_alignment ((List.nth s1 (i))::a1)
                                    ((List.nth s2 (j))::a2)
@@ -126,9 +120,9 @@ let wrapper f s1 s2 =
            )
 
                   
-let nw = fun() -> (wrapper global_align "GATTACA"  "GCATGCU")
+let nw =  wrapper global_align
                    
-let sw = fun() -> (wrapper local_align "TGTTACGG" "GGTTGACTA")
+let sw =  wrapper local_align 
 
 let merge_align (score : 'a token -> 'a token -> bool -> float) s1 s2 h1 h2=
   let rec multiscore (t1 : 'a token list token) (t2 : 'a token list token) c =
