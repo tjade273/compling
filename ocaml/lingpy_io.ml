@@ -60,7 +60,7 @@ let read_msq (filename : string) (model : string -> 'a token) : 'a msq =
   ((dataset,phrase), List.of_enum alignments)
                                
 let msq_align score align ((d,p), a) : 'a msa=
-  let sim x y = snd (align x y) in
+  let sim l1 l2 x y = snd (align l1 l2 x y) in
   let dist = distance sim in 
   let detokenize = function Token a -> a | _ -> failwith "Bad final alignment" in
   let upgma_tree = List.hd (upgma dist (merge_align score) infinity a) in
@@ -111,4 +111,5 @@ let run_msa_test model score align msqs msas n =
 let msas = "../data/test_data/";;
 let msqs = "../data/Online_Resource_2/I_Gold_Standard/msq/";;
 let () = run_msa_test dolgo_of_string dolgo_score dolgo_align msqs msas 100;;
+ 
  *)

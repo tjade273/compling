@@ -75,7 +75,7 @@ let dolgo_of_string s =
   in
   Token(to_char s,s)
 
-let dolgo_align =
+let dolgo_align l1 l2 =
   align
     (fun (i1, j1, s1) (i2, j2, s2) -> (max i1 i2, max j1 j2))
     [] dolgo_score
