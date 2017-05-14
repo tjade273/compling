@@ -83,13 +83,3 @@ let upgma_wrapper score merge cutoff l =
                                                             (String.explode n)
                                                  ,name)
                                      ) l)
-
-        
-(*
-let test = upgma_wrapper (memoize distance_score 100) (-0.1) ["ABCD"; "ACD"; "XXYYZ"; "XXXYYZ"; "PQRST"; "PRSTT";"ABCEE"; "1234"; "16182872"; "157626781"; "1778879"; "9jkjkiu"];;*)
-       
-let test1 =
-  upgma_wrapper distance_score
-                          (merge_align global_score)
-                          (2.) [("AB","AB");("ABCEFD", "ABCEFD"); ("AAAAABBBC", "Buncha As");("ABCABC", "ABCABC"); ("XYZ", "XYZ"); ("XYZAB","XYZAB"); ("XXXXXXXXXXXXXXXXXYYYY", "XXX")];;
- 

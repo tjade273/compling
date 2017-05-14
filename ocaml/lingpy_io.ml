@@ -60,14 +60,14 @@ let read_msq (filename : string) (model : string -> 'a token) : 'a msq =
   ((dataset,phrase), List.of_enum alignments)
                                
 let msq_align score align ((d,p), a) : 'a msa=
-  let sim x y = snd (align x y)in
+  let sim x y = snd (align x y) in
   let dist = distance sim in 
   let detokenize = function Token a -> a | _ -> failwith "Bad final alignment" in
   let upgma_tree = List.hd (upgma dist (merge_align score) infinity a) in
   match upgma_tree with
   | Node (_,_,alignment, names) -> ((d,p),
                                     List.map2 (fun a b -> (a,b))
-                                              (transpose
+                                              (List.transpose
                                                  (List.map detokenize alignment))
                                               names)
   | _ -> failwith "Clustering Error"

@@ -161,13 +161,7 @@ let merge_align (score : 'a token -> 'a token -> bool -> float) s1 s2 h1 h2=
                           [] multiscore s1 s2 in
   let res =  stack x y in
   res
-
-let rec transpose list = match list with
-| []             -> []
-| []   :: xss    -> transpose xss
-| (x::xs) :: xss ->
-    (x :: List.map List.hd xss) :: transpose (xs :: List.map List.tl xss)
     
 let print_align a =
   let at = List.map (function Token x -> x) a in 
-  (List.map (fun x -> String.of_list (List.map print_token x)) (transpose at))
+  (List.map (fun x -> String.of_list (List.map print_token x)) (List.transpose at))
