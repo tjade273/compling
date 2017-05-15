@@ -57,13 +57,13 @@ let write_alignments filename ((header, msas) : string * 'a msa list) =
   in
   File.write_lines filename lines
 
-               
+(*               
 let n = 2.
 let path = "../data/SequenceComparison-SupplementaryMaterial-cc4bf85/benchmark/cognates/GER.csv"
 let wlist = read_wordlist path dolgo_of_string
 let aligned = align_wordlist dolgo_score dolgo_align 0.8 false wlist 
 let () =  write_alignments "../test2.csv" aligned
-
+ *)
 type 'a score_matrix = ((string * string) * (('a token * 'a token) * float) list) list
 
 
@@ -164,7 +164,7 @@ let dolgo_no_lang = dolgo_align "" ""
 let make_dolgo wlist =
   let words = list_of_words wlist in
   let expected = random_scores dolgo_no_lang words in
-  let aligned = align_wordlist dolgo_score dolgo_align 1. true wlist in
+  let aligned = align_wordlist dolgo_score dolgo_align 6. true wlist in
   let attested = scores_of_aligned_wordlist aligned in 
   let pair_scores l1 l2 = create_scores 2. 2. dolgo_score (-5.) 0.00000001 attested expected (language_name_of_data l1) (language_name_of_data l2) in
   let lexalign l1 l2=
@@ -172,4 +172,15 @@ let make_dolgo wlist =
       (fun (i1, j1, s1) (i2, j2, s2) -> (max i1 i2, max j1 j2))
       [] (pair_scores l1 l2)
   in
-  align_wordlist dolgo_score lexalign 0.8 false wlist
+  align_wordlist dolgo_score lexalign 25. false wlist
+
+let test s =
+  let w = read_wordlist (path^s) dolgo_of_string in
+  let m = make_dolgo w in
+  write_alignments ("../"^s) m
+
+let langs = ["GER.csv"; "SLV.csv"; "JAP.csv"; "ROM.csv"]
+(*
+let () = List.iter test langs 
+
+ *)
