@@ -63,9 +63,9 @@ In order to measure the similarity between segments, I use an adapted version of
 To create the pairwise alignments, I use a dynamic programming technique which operates on a matrix representing optimal subsequence alignments. Each cell of the matrix is filled inductively by the rule 
 \begin{equation}
 M_{i,j} = \max\begin{cases}
-F_{i,j-1} + S(-, B_j)\\
-F_{i-1,j} + S(A_i, -)\\
-F_{i-1, j-1} + S(A_i, B_j)
+M_{i,j-1} + S(-, B_j)\\
+M_{i-1,j} + S(A_i, -)\\
+M_{i-1, j-1} + S(A_i, B_j)
 \end{cases}
 \end{equation}
 where $A$ and $B$ are the sequences to align of length $a$ and $b$ respectively, $S$ is the scoring function, and $(-)$ represents a gap (insertion or deletion). The $i,j$th cell of the matrix thus represents the optimal alignment of the first $i$ characters of $A$ with the first $j$ characters of $B$.
@@ -79,7 +79,7 @@ The ability to define an arbitrary scoring function for pairs of sequences and g
 	
 	\begin{tabular}{|l||ccccccccccccccc||c|}
 		\hline
-		Seq. 1 & A&B&C&X&X&X&X&X&X&A&B&C&X&X&X&Score:\\
+		Seq. & A&B&C&X&X&X&X&X&X&A&B&C&X&X&X&Score:\\
 		Needleman & A&B&C&-&-&-&-&-&-&A&B&C&-&-&-&-3\\
 		Smith & A&B&C&-&-&-&-&-&-&A&B&C&&&&30\\\hline
 	\end{tabular}
